@@ -53,7 +53,12 @@ the database during the next commit. In order to check what all changes have
 been done, we can use the `diff` command which lists the differences between 
 working area and staging area.
 
-        $ git diff  # lists the changes between staging area and working area
+        # lists the changes between staging area and working dir.
+        # If all the changes are staged, this gives nothing
+        $ git diff  
+        # lists changes between staging area and last commit, use anyone:
+        $ git diff --staged 
+        $ git diff --cached
 
 All the files in a git repo can be either in the tracked state, or untracked 
 state. The status of the files can be checked using `status` command:
@@ -81,14 +86,40 @@ Further, every tracked file in the git repo is in one of the three stages:
 * Staged: The files are changed, and the changes have been acknowledged. If you 
     commit right now, the changes will go to the local database. This is also 
     called the `index` of the repository. A file or directory can be staged 
-    using `git add file_name`
+    using `git add <file|directory>`
 * Committed: The files are committed, i.e. all the changes that have been done 
-    are now saved in the local database.
+    are now saved in the local database. 
+
+        $ git commit 
+        $ git commit -m 'message for this commit'
+        $ git commit -a -m 'message for this commit'  # skips the staging area
 
 
 ### Branching ###
 
+        # Creates a new branch, but doesn't check it out
+        $ git branch <branch-name>  
+
+        # Creates a new branch and checks it out as well
+        $ git checkout -b <branch-name>
+
 ### Removing files from the branches, all the way ###
+There are two roads that we can take here:
+
+### Removing files from the branches, all the way ###
+There are two roads that we can take here:
+
+* Using `rm <filename>` to delete the file from the working directory. The 
+    change is noted by git, but has to be staged manually using 
+    `git add <filename>`.
+* Using `git rm <filename>` to remove the file from the working directory and 
+    index, and stop tracking it. `git rm` removes the files and stages the 
+    changes. These just need to be committed.
+* Using `git rm --cached <filename>` to remove it from the index but keep the 
+    local file. Since the file is present in the working directory, it will 
+    appear in the list of untracked files. A commit is needed. 
+
+    
 
 
 
