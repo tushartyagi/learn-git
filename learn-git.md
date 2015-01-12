@@ -95,18 +95,7 @@ Further, every tracked file in the git repo is in one of the three stages:
         $ git commit -a -m 'message for this commit'  # skips the staging area
 
 
-### Branching ###
-
-        # Creates a new branch, but doesn't check it out
-        $ git branch <branch-name>  
-
-        # Creates a new branch and checks it out as well
-        $ git checkout -b <branch-name>
-
-### Removing files from the branches, all the way ###
-There are two roads that we can take here:
-
-### Removing files from the branches, all the way ###
+### Removing files ###
 There are two roads that we can take here:
 
 * Using `rm <filename>` to delete the file from the working directory. The 
@@ -119,7 +108,121 @@ There are two roads that we can take here:
     local file. Since the file is present in the working directory, it will 
     appear in the list of untracked files. A commit is needed. 
 
-    
+
+### Renaming a file ###
+Git supports git mv which can help in renamaing a file. If we are using system 
+`mv`, much like `rm`, we have to manually stage the changes. `git mv` is a 
+shortcut for:
+
+        $ mv <filename-old> <filename-new>
+        $ git rm <filename-old>
+        $ git add <filename-new>
+
+### Seeing the differences ###
+`git log` lists out all the commits that have been made. using `-p` option 
+lists commit's info as well. using `--stat` gives information about insersions, 
+and deletions in the file.
+
+### Undoing ###
+`git reset HEAD <filname>` will unstage the file which has been accidently 
+staged in the index.
+
+`git checkout -- <filename>` will write over the file with the previous version 
+of the file. Since the <filename> file was not apparently committed (since it 
+was on the index), DON'T use this to restore the older version if you don't 
+want to lose the changes.
+
+### Working with Remotes ###
+
+`git remote add [shortname] [url]` and then use `git fetch shortname` 
+
+`git push [remote] [local]` => `git push origin master` In order to push, we 
+have to pull their work first. There cannot be successive pushing between 
+different people without any pulling.
+
+### Branching ###
+
+Before we start with detail of branching, let's take a sidestep in order to 
+understand a few concepts.
+
+Git doesn't store each and every file that is changed from one commit to 
+another, but it only creates a snapshot of the changes, i.e. the content of the 
+repository at the moment of the commit.
+
+When a commit is done, roughly we have the following happening:
+* Every file is checksum-ed and stored as a blob object
+* The directory tree is created, with checksums of the child files and 
+    directories. It's checksum is also calculated.
+* Commit object stores the commit metadata, as well as the checksum of the 
+    current directory tree. This metadata stores the committer data, and the 
+    checksum of the parent commit. 
+
+So we can get the current directory snapshot from any commit object using the 
+stored checksum, move to that and get the directory structure using the stored 
+hashes of the child files and directories.
+
+Coming back to branching, we can create a new branch using the following 
+command: 
+
+        # Creates a new branch, but doesn't check it out
+        $ git branch <branch-name>  
+
+        # Creates a new branch and checks it out as well
+        $ git checkout -b <branch-name>
+
+While the new branch is created, we are not using it if we used the first 
+command. In order to start working on the new branch, use `checkout`.
+
+        $ git checkout <branch-name>
 
 
+Also with every branch, we have what is called the HEAD pointer, which points 
+to the current working branch. If we change the branch, we simply move HEAD to 
+point to the new branch. 
 
+The current status of HEAD can be checked using the `--decorate` parameter 
+(`--all` checks out all the branches, and `--oneline` prints only one line 
+commit message of every commit):
+
+        $ git log --decorate --all --oneline
+
+When, on the current branch, we create a new commit, HEAD moves to the new 
+commit (storing the previous commit's hash in the metadata, as already 
+discussed).
+
+We can list out all the branches using `git branch` command. Passing `-v` lists 
+the last message of each commit as well.
+
+        $ git branch -v 
+
+Using `--merged` and `--no-merged` parameters will show the branches which have 
+been and have not been merged to the current branch. Those which are already 
+merged can be safely deleted; git won't let you delete the branches listed by 
+`--no-merged` parameter.
+
+### Merging ###
+
+Once we are done with a branch, we have to add it back to the main codebase. 
+This is process called merging. 
+
+Let's take an example where we need to merge the changes of some branch called 
+feature12 into the master branch. It is done in the following manner:
+
+* Checkout the branch where the merge is going to be done, in this case 
+`master`.
+
+        $ git checkout master
+
+* Use `git merge <branchname>` to merge the changes:
+
+        $ git merge feature12
+
+Now there are two ways of merging branches, depending on the structure of the 
+branch tree. 
+1. If master is a direct ancestor of the current branch, git uses 
+    fast-forward strategy where the pointer of the master branch (in our case) 
+    will be moved to the new branch.
+2. If master is on some parallel path from the new branch, and they share a 
+    common ancestor (they will have to :)), then git merges the changes in the 
+    common ancestor and creates a new commit out of this merge. 
+ 
