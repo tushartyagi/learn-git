@@ -226,3 +226,38 @@ branch tree.
     common ancestor (they will have to :)), then git merges the changes in the 
     common ancestor and creates a new commit out of this merge. 
  
+### Remote Git ###
+First when a `git clone` command is used, git creates a local repo for you to 
+work on. The master is the repo that you usually work on, unless the name is 
+changed. Even on the remote server there is a branch called master (unless a 
+different name is used). After clone, the master of remote is available as 
+`origin/master`. 
+
+Every change that we do the local repo takes us away from `origin/master`. If, 
+in the meantime, data on the server has also changed, we use the `fetch` 
+command to update the local repo.
+
+        $ git fetch origin
+        $ git fetch <remote-name>
+
+fetching doesn't allow us to make changes since the pointer still points to the 
+remote branch. In order to start working on this, we need to merge the new 
+branch with our local branch, or create a new branch entirely:
+
+        $ git merge origin/branchname 
+        $ git checkout -b origin/branchname
+        $ git checkout -b <local-alias> origin/branchname
+
+`git push <remote> <local>` is used to push the changes that you've done in the 
+local branch into the remote branch, which is a shortcut to:
+
+        $ git push <remote-name> localbranch:remotebranch
+
+        $ git branch -vv
+        iss53     7e424c3 [origin/iss53: ahead 2] forgot the brackets
+        master    1ae2a45 [origin/master] deploying index fix
+        * serverfix f8674d9 [teamone/server-fix-good: ahead 3, behind 1] this should do it
+        testing   5ea463a trying something new
+
+ahead n means we have n changes that we haven't pushed to the server.
+behind n means we have n changes that we haven't merged from the server.
